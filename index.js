@@ -56,7 +56,7 @@ app.post("/ussd", async (req, res) => {
     if (existingUser) {
       response = `END You are already registered`;
     } else {
-      const profileCOde = generateProfileCode(name);
+      const profileCode = generateProfileCode(name);
       await User.create({
         phone: phoneNumber,
         name,
