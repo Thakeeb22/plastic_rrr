@@ -66,7 +66,8 @@ app.post("/ussd", async (req, res) => {
       });
       response = `END Registration successful
      Name: ${name}
-     Code: ${profileCode}`;
+     Your Profile Code: ${profileCode}
+     You will use this profile code during login`;
     }
   }
   //   Login
@@ -78,7 +79,7 @@ app.post("/ussd", async (req, res) => {
     if (!user) {
       response = `END Invalid profile code`;
     } else {
-      response = `CON Welcome ${usser.name}
+      response = `CON Welcome ${user.name}
         1. Submit Plastic
         2. View Points`;
     }
