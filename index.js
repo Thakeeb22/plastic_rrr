@@ -85,9 +85,9 @@ app.post("/ussd", async (req, res) => {
     }
   }
   //   Submitting of plastic
-  else if (data[0] === "2" && data[2] === "1") {
+  else if (data[0] === "2" && data.length === 3 && data[2] === "1") {
     response = `CON Enter Plastic quantity (kg)`;
-  } else if (data[0] === "2" && data[2] === "1" && data.length === 4) {
+  } else if (data[0] === "2" && data.length === 4 && data[2] === "1" ) {
     const code = data[1];
     const weight = Number(data[3]);
     if (isNaN(weight) || weight <= 0) {
@@ -110,7 +110,7 @@ app.post("/ussd", async (req, res) => {
     const code = data[1];
     const user = await User.findOne({ profileCode: code });
     if(!user){
-        reponse = `END User not found`
+        response = `END User not found`
     }else{
         response = `END Points: ${user.points}`
     }
