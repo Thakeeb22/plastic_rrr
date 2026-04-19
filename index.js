@@ -75,7 +75,7 @@ app.post("/ussd", async (req, res) => {
     response = `CON ENter your profile code`;
   } else if (data[0] === "2" && data.length === 2) {
     const code = data[1];
-    const user = await User.findOne({ profileCode: code });
+    const user = await User.findOne({ profileCode: data[1], phone: phoneNumber });
     if (!user) {
       response = `END Invalid profile code`;
     } else {
@@ -87,19 +87,23 @@ app.post("/ussd", async (req, res) => {
   //   Submitting of plastic
   else if (data[0] === "2" && data.length === 3 && data[2] === "1") {
     response = `CON Enter Plastic quantity (kg)`;
-  } else if (data[0] === "2" && data.length === 4 && data[2] === "1" ) {
+  } else if (data[0] === "2" && data.length === 4 && data[2] === "1") {
     const code = data[1];
     const weight = Number(data[3]);
     if (isNaN(weight) || weight <= 0) {
       response = `END Invalid quantity`;
     } else {
-      const user = await User.findOne({ profileCode: code });
+      const user = await User.findOne({
+        profileCode: code,
+        phone: phoneNumber,
+      });
       if (!user) {
         response = `END User not found`;
       } else {
         await Transaction.create({
           phone: user.phone,
           userWeight: weight,
+          status: "pending",
         });
         response = `END Submission recieved. Awaiting verification`;
       }
@@ -108,17 +112,41 @@ app.post("/ussd", async (req, res) => {
   // viewing of points
   else if (data[0] === "2" && data[2] === "2") {
     const code = data[1];
-    const user = await User.findOne({ profileCode: code });
-    if(!user){
-        response = `END User not found`
-    }else{
-        response = `END Points: ${user.points}`
+    const user = await User.findOne({ profileCode: data[1], phone: phoneNumber });
+    if (!user) {
+      response = `END User not found`;
+    } else {
+      response = `END Points: ${user.points}`;
     }
   }
-//   dafault
-else{
-    response = `END Invalid option`
-}
-res.set("Content-Type", "text/plain")
-res.send(response)
+  //   dafault
+  else {
+    response = `END Invalid option`;
+  }
+  res.set("Content-Type", "text/plain");
+  res.send(response);
 });
+app.post("/admin/verify", async (req,res)=>{
+    const {transactionId, verifiedWeight} =req.body
+    const transaction = await Transaction.findById(transactionId)
+    if(!transaction){
+        return res.json({message: "Transaction not found"})
+    }
+    if (transaction.status === "approved"){
+        return res.status({message: "Already Approved"})
+    }
+    // update transaction
+    transaction.verifiedWeight = verifiedWeight
+    transaction.status = "approved"
+    await transaction.save()
+    // update user points
+    const user = await User.findOne({phone: transaction.phone})
+    const points = verifiedWeight * 100
+    user.points += points
+    user.totalPlastic += verifiedWeight
+    await user.save()
+    res.json({
+        message: "Approved Successfully",
+        pointAdded: points
+    })
+})
