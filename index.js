@@ -126,6 +126,8 @@ app.post("/ussd", async (req, res) => {
   res.set("Content-Type", "text/plain");
   res.send(response);
 });
+// admin flow
+// verify route
 app.post("/admin/verify", async (req,res)=>{
     const {transactionId, verifiedWeight} =req.body
     const transaction = await Transaction.findById(transactionId)
@@ -149,4 +151,26 @@ app.post("/admin/verify", async (req,res)=>{
         message: "Approved Successfully",
         pointAdded: points
     })
+})
+// pending submissions
+app.get("/admin/pending", async (req, res)=>{
+    const trasactions = await Transaction.find({status: "pending"})
+    res.json(transactions)
+})
+app.get("/admin", async (req, res) =>{
+    const transactions = await Transaction.find({ status: "pending"})
+    let html = `<h1>Pending Submissions</h1>`
+    transactions.forEach(t => {
+        html += `
+        <div style="border:1px solid #ccc; padding:10px; margin:10px">
+        <p><b>Phone:</b> ${t.phone}</p>
+        <p><b>Submitted:</b> ${t.userWeight} kg</p>
+        <form method="POST" action="/admin/verify">
+        <input type="hidden" name="transactionId" value="${t._id}"/>
+        <input type="number" name="verifiedWeight" placeholder="Verified kg" required/>
+        <button type="submit">Approve</button>
+        </form>
+        </div>`
+    })
+    res.send(html)
 })
