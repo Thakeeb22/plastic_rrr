@@ -27,7 +27,7 @@ app.post("/ussd", async (req, res) => {
   const { phoneNumber, text } = req.body;
 
   let response = "";
-  const data = text.split("*");
+  const data = (text || "").split("*");
 
   // Main menu
   if (text === "") {
@@ -72,7 +72,7 @@ app.post("/ussd", async (req, res) => {
   }
   //   Login
   else if (text === "2") {
-    response = `CON ENter your profile code`;
+    response = `CON Enter your profile code`;
   } else if (data[0] === "2" && data.length === 2) {
     const code = data[1];
     const user = await User.findOne({
@@ -109,13 +109,12 @@ app.post("/ussd", async (req, res) => {
           userWeight: weight,
           status: "pending",
         });
-        response = `END Submission recieved. Awaiting verification`;
+        response = `END Submission received. Awaiting verification`;
       }
     }
   }
   // viewing of points
   else if (data[0] === "2" && data[2] === "2") {
-    const code = data[1];
     const user = await User.findOne({
       profileCode: data[1],
       phone: phoneNumber,
@@ -157,7 +156,7 @@ app.post("/admin/reject", async (req, res) => {
   const transaction = await Transaction.findById(transactionId);
   if (!transaction) return res.send("Transaction not found");
   if (transaction.status !== "pending") {
-    res.send("Already processed");
+    return res.send("Already processed");
   }
   transaction.status = "rejected";
   await transaction.save();
