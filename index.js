@@ -75,7 +75,10 @@ app.post("/ussd", async (req, res) => {
     response = `CON ENter your profile code`;
   } else if (data[0] === "2" && data.length === 2) {
     const code = data[1];
-    const user = await User.findOne({ profileCode: data[1], phone: phoneNumber });
+    const user = await User.findOne({
+      profileCode: data[1],
+      phone: phoneNumber,
+    });
     if (!user) {
       response = `END Invalid profile code`;
     } else {
@@ -112,7 +115,10 @@ app.post("/ussd", async (req, res) => {
   // viewing of points
   else if (data[0] === "2" && data[2] === "2") {
     const code = data[1];
-    const user = await User.findOne({ profileCode: data[1], phone: phoneNumber });
+    const user = await User.findOne({
+      profileCode: data[1],
+      phone: phoneNumber,
+    });
     if (!user) {
       response = `END User not found`;
     } else {
@@ -127,50 +133,60 @@ app.post("/ussd", async (req, res) => {
   res.send(response);
 });
 // admin flow
-// verify route
-app.post("/admin/verify", async (req,res)=>{
-    const {transactionId, verifiedWeight} =req.body
-    const transaction = await Transaction.findById(transactionId)
-    if(!transaction){
-        return res.json({message: "Transaction not found"})
-    }
-    if (transaction.status === "approved"){
-        return res.status({message: "Already Approved"})
-    }
-    // update transaction
-    transaction.verifiedWeight = verifiedWeight
-    transaction.status = "approved"
-    await transaction.save()
-    // update user points
-    const user = await User.findOne({phone: transaction.phone})
-    const points = verifiedWeight * 100
-    user.points += points
-    user.totalPlastic += verifiedWeight
-    await user.save()
-    res.json({
-        message: "Approved Successfully",
-        pointAdded: points
-    })
-})
+//  admin approve route
+app.post("/admin/approve", async (req, res) => {
+  const { transactionId } = req.body;
+  const transaction = await Transaction.findById(transactionId);
+  if (!transaction) return res.send("Transaction not found");
+  if (transaction.status !== "pending") {
+    return res.send("Already processed");
+  }
+  transaction.status = "approved";
+  await transaction.save();
+  const user = await User.findOne({ phone: transaction.phone });
+  const points = transaction.userWeight * 100;
+  user.points += points;
+  user.totalPoints += points;
+  await user.save();
+  res.redirect("/admin");
+});
+// admin reject route
+app.post("/admin/reject", async (req, res) => {
+  const { transactionId } = req.body;
+  const transaction = await Transaction.findById(transactionId);
+  if (!transaction) return res.send("Transaction not found");
+  if (transaction.status !== "pending") {
+    res.send("Already processed");
+  }
+  transaction.status = "rejected";
+  await transaction.save();
+  res.redirect("/admin");
+});
 // pending submissions
-app.get("/admin/pending", async (req, res)=>{
-    const trasactions = await Transaction.find({status: "pending"})
-    res.json(transactions)
-})
-app.get("/admin", async (req, res) =>{
-    const transactions = await Transaction.find({ status: "pending"})
-    let html = `<h1>Pending Submissions</h1>`
-    transactions.forEach(t => {
-        html += `
+app.get("/admin/pending", async (req, res) => {
+  const transactions = await Transaction.find({ status: "pending" });
+  res.json(transactions);
+});
+app.get("/admin", async (req, res) => {
+  const transactions = await Transaction.find({ status: "pending" });
+  let html = `<h1>Pending Submissions</h1>`;
+  transactions.forEach((t) => {
+    html += `
         <div style="border:1px solid #ccc; padding:10px; margin:10px">
+
         <p><b>Phone:</b> ${t.phone}</p>
         <p><b>Submitted:</b> ${t.userWeight} kg</p>
-        <form method="POST" action="/admin/verify">
+
+        <form method="POST" action="/admin/approve" style="display:inline;">
         <input type="hidden" name="transactionId" value="${t._id}"/>
-        <input type="number" name="verifiedWeight" placeholder="Verified kg" required/>
         <button type="submit">Approve</button>
         </form>
-        </div>`
-    })
-    res.send(html)
-})
+
+        <form method="POST" action="/admin/reject" style="display:inline;">
+        <input type="hidden" name="transactionId" value="${t._id}"/>
+        <button type="submit">Reject</button>
+        </form>
+        </div>`;
+  });
+  res.send(html);
+});
