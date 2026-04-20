@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const transactionSchema = new mongoose.Schema({
   phone: String,
+  profileCode: String,
   userWeight: Number,
   status: {
     type: String,

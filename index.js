@@ -105,6 +105,7 @@ app.post("/ussd", async (req, res) => {
       } else {
         await Transaction.create({
           phone: user.phone,
+          profileCode: user.profileCode,
           userWeight: weight,
           status: "pending",
         });
