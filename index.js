@@ -173,7 +173,7 @@ app.get("/admin", async (req, res) => {
   transactions.forEach((t) => {
     html += `
         <div style="border:1px solid #ccc; padding:10px; margin:10px">
-
+        <p><b>Profile Code:</b> ${t.profileCode}</p>
         <p><b>Phone:</b> ${t.phone}</p>
         <p><b>Submitted:</b> ${t.userWeight} kg</p>
 
