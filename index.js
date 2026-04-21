@@ -4,6 +4,12 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const Africastalking = require("africastalking");
+const africastalking = Africastalking({
+  apiKey: process.env.AT_API_KEY,
+  username: process.env.AT_USERNAME,
+});
+const sms = africastalking.SMS;
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -27,7 +33,7 @@ app.post("/ussd", async (req, res) => {
   const { phoneNumber, text } = req.body;
 
   let response = "";
-  const data = (text || "").split("*");
+  const data = (text || "").trim().split("*");
 
   // Main menu
   if (text === "") {
@@ -103,6 +109,15 @@ app.post("/ussd", async (req, res) => {
       if (!user) {
         response = `END User not found`;
       } else {
+        const existing = await Transaction.findOne({
+          phone: user.phone,
+          status: "pending",
+        });
+        if (existing) {
+          response = `END You already have a pending submission`;
+          res.set("Content-Type", "text/plain");
+          return res.send(response);
+        }
         await Transaction.create({
           phone: user.phone,
           profileCode: user.profileCode,
@@ -148,6 +163,12 @@ app.post("/admin/approve", async (req, res) => {
   user.points += points;
   user.totalPoints += points;
   await user.save();
+  await sendSMS(
+    user.phone,
+    `You have successfully deposited ${transaction.userWeight} kg of plastic.
+    You have earned ${points} points. Your total points are now ${user.totalPoints}.
+    Thank you for helping reduce plastic waste in the planet`,
+  );
   res.redirect("/admin");
 });
 // admin reject route
@@ -160,6 +181,12 @@ app.post("/admin/reject", async (req, res) => {
   }
   transaction.status = "rejected";
   await transaction.save();
+  await sendSMS(
+    transaction.phone,
+    `Your plastic submission of ${transaction.userWeight} kg has been rejected. 
+    Please ensure you enter the correct weight nex time.
+    Thank you for helping reduce plastic waste in the planet`,
+  );
   res.redirect("/admin");
 });
 // pending submissions
@@ -176,6 +203,7 @@ app.get("/admin", async (req, res) => {
         <p><b>Profile Code:</b> ${t.profileCode}</p>
         <p><b>Phone:</b> ${t.phone}</p>
         <p><b>Submitted:</b> ${t.userWeight} kg</p>
+        <p><b>Time: </b> ${new Date(t.createdAt).toLocaleString()}</p>
 
         <form method="POST" action="/admin/approve" style="display:inline;">
         <input type="hidden" name="transactionId" value="${t._id}"/>
@@ -190,3 +218,26 @@ app.get("/admin", async (req, res) => {
   });
   res.send(html);
 });
+// SMS function
+async function sendSMS(to, message) {
+  try {
+    const respnse = await sms.send({
+      to: [to],
+      message,
+    });
+    console.log("SMS sent successfully:", response);
+  } catch (error) {
+    console.log("SMS error:", error);
+  }
+}
+// format phone number
+function formatPhone(phone) {
+  if (phone.startsWith("0")) {
+    return "+234" + phone.substring(1);
+  }
+  if (!phone.startsWith("+")) {
+    return "+" + phone;
+  }
+  return phone;
+}
+await sendSMS(formatPhone(user.phone), message);
