@@ -3,7 +3,6 @@ const Transaction = require("./models/Transaction");
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
 const Africastalking = require("africastalking");
 const africastalking = Africastalking({
   apiKey: process.env.AT_API_KEY,
@@ -25,7 +24,7 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 function generateProfileCode(name) {
-  const prefix = name.substring(0, 3).toUpperCase();
+  const prefix = name.substring(0, 3).padEnd(3, "X").toUpperCase();
   const random = Math.floor(100 + Math.random() * 900);
   return prefix + random;
 }
@@ -82,7 +81,7 @@ app.post("/ussd", async (req, res) => {
   } else if (data[0] === "2" && data.length === 2) {
     const code = data[1];
     const user = await User.findOne({
-      profileCode: data[1],
+      profileCode: code,
       phone: phoneNumber,
     });
     if (!user) {
@@ -149,12 +148,11 @@ app.post("/ussd", async (req, res) => {
 });
 // admin flow
 //  admin approve route
-app.post("/admin/approve", async (req, res) => {
+app.post("/admin/approve", adminAuth, async (req, res) => {
   const { transactionId } = req.body;
   const transaction = await Transaction.findById(transactionId);
-  if (!transaction) return res.send("Transaction not found");
-  if (transaction.status !== "pending") {
-    return res.send("Already processed");
+  if (!transaction || transaction.status !== "pending") {
+    return res.send("Already processed or not found");
   }
   transaction.status = "approved";
   await transaction.save();
@@ -163,40 +161,48 @@ app.post("/admin/approve", async (req, res) => {
   user.points += points;
   user.totalPoints += points;
   await user.save();
-  await sendSMS(
-    user.phone,
-    `You have successfully deposited ${transaction.userWeight} kg of plastic.
+  try {
+    await sendSMS(
+      formatPhone(user.phone),
+      `You have successfully deposited ${transaction.userWeight} kg of plastic.
     You have earned ${points} points. Your total points are now ${user.totalPoints}.
     Thank you for helping reduce plastic waste in the planet`,
-  );
-  res.redirect("/admin");
+    );
+  } catch (e) {
+    console.log("SMS failed but continuing with approval process", e);
+  }
+  res.redirect(`/admin?password=${req.body.password}`);
 });
 // admin reject route
-app.post("/admin/reject", async (req, res) => {
+app.post("/admin/reject", adminAuth, async (req, res) => {
   const { transactionId } = req.body;
   const transaction = await Transaction.findById(transactionId);
-  if (!transaction) return res.send("Transaction not found");
-  if (transaction.status !== "pending") {
-    return res.send("Already processed");
+  if (!transaction || transaction.status !== "pending") {
+    return res.send("Already processed or not found");
   }
   transaction.status = "rejected";
   await transaction.save();
-  await sendSMS(
-    transaction.phone,
-    `Your plastic submission of ${transaction.userWeight} kg has been rejected. 
-    Please ensure you enter the correct weight nex time.
+  try {
+    await sendSMS(
+      formatPhone(transaction.phone),
+      `Your plastic submission of ${transaction.userWeight} kg was rejected.
+    Please ensure you enter the correct weight next time.
     Thank you for helping reduce plastic waste in the planet`,
-  );
-  res.redirect("/admin");
+    );
+  } catch (e) {
+    console.log("SMS failed but continuing with approval process", e);
+  }
+  res.redirect(`/admin?password=${req.body.password}`);
 });
 // pending submissions
-app.get("/admin/pending", async (req, res) => {
+app.get("/admin/pending", adminAuth, async (req, res) => {
   const transactions = await Transaction.find({ status: "pending" });
   res.json(transactions);
 });
-app.get("/admin", async (req, res) => {
+app.get("/admin", adminAuth, async (req, res) => {
   const transactions = await Transaction.find({ status: "pending" });
-  let html = `<h1>Pending Submissions</h1>`;
+  let html = `<h1>Pending Submissions</h1>
+  <a href="/admin/history?password=${req.query.password}">View History</a>`;
   transactions.forEach((t) => {
     html += `
         <div style="border:1px solid #ccc; padding:10px; margin:10px">
@@ -205,13 +211,15 @@ app.get("/admin", async (req, res) => {
         <p><b>Submitted:</b> ${t.userWeight} kg</p>
         <p><b>Time: </b> ${new Date(t.createdAt).toLocaleString()}</p>
 
-        <form method="POST" action="/admin/approve" style="display:inline;">
+        <form method="POST" action="/admin/approve?password=${req.query.password}" style="display:inline;">
         <input type="hidden" name="transactionId" value="${t._id}"/>
+        <input type="hidden" name="password" value="${req.query.password}"/>
         <button type="submit">Approve</button>
         </form>
 
-        <form method="POST" action="/admin/reject" style="display:inline;">
+        <form method="POST" action="/admin/reject?password=${req.query.password}" style="display:inline;">
         <input type="hidden" name="transactionId" value="${t._id}"/>
+        <input type="hidden" name="password" value="${req.query.password}"/>
         <button type="submit">Reject</button>
         </form>
         </div>`;
@@ -221,7 +229,7 @@ app.get("/admin", async (req, res) => {
 // SMS function
 async function sendSMS(to, message) {
   try {
-    const respnse = await sms.send({
+    const response = await sms.send({
       to: [to],
       message,
     });
@@ -235,9 +243,41 @@ function formatPhone(phone) {
   if (phone.startsWith("0")) {
     return "+234" + phone.substring(1);
   }
-  if (!phone.startsWith("+")) {
+  if (phone.startsWith("234")) {
     return "+" + phone;
   }
   return phone;
 }
-await sendSMS(formatPhone(user.phone), message);
+app.get("/admin/history", adminAuth, async (req, res) => {
+  const transactions = await Transaction.find({
+    status: { $in: ["approved", "rejected"] },
+  }).sort({ createdAt: -1 });
+  let html = `<h1>Transaction History</h1>
+  <a href="/admin?password=${req.query.password}">Back to Pending</a>`;
+  transactions.forEach((t) => {
+    html += `
+    <div style="border:1px solid #ccc; padding:10px; margin:10px">
+    <p><b>Profile Code:</b> ${t.profileCode}</p>
+    <p><b>Phone:</b> ${t.phone}</p>
+    <p><b>Weight:</b> ${t.userWeight} kg</p>
+    <p><b>Status:</b> ${t.status}</p>
+    <p><b>Time:</b> ${new Date(t.createdAt).toLocaleString()}</p>
+    </div>
+    `;
+  });
+  res.send(html);
+});
+function adminAuth(req, res, next) {
+  const password = req.query.password || req.body.password;
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return res.send(`
+      <h2>Admin Login</h2>
+      <form>
+      <input type="password" name="password" placeholder="Enter Password"/>
+      <button type="submit">Login</button>
+      </form>
+      `);
+    
+  }
+  next();
+}
