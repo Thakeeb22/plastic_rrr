@@ -268,11 +268,11 @@ app.get("/admin/history", adminAuth, async (req, res) => {
   res.send(html);
 });
 function adminAuth(req, res, next) {
-  const password = req.query.password || req.body.password;
+  const password = (req.query && req.query.password) || (req.body && req.body.password)
   if (password !== process.env.ADMIN_PASSWORD) {
     return res.send(`
       <h2>Admin Login</h2>
-      <form>
+      <form method="GET" action="/admin">
       <input type="password" name="password" placeholder="Enter Password"/>
       <button type="submit">Login</button>
       </form>
