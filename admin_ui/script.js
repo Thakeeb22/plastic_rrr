@@ -2,19 +2,20 @@ const BASE_URL = "https://plastic-rrr.onrender.com";
 
 const pendingContainer = document.querySelector(".pending");
 async function loadPending() {
-    pendingContainer.innerHTML = "<p>Loading...</p>"
+  pendingContainer.innerHTML = "<p>Loading...</p>";
   try {
-    const res = await fetch("https://plastic-rrr.onrender.com/admin/pending");
+    const res = await fetch(`${BASE_URL}/admin/pending`);
     const data = await res.json();
     renderPending(data);
   } catch (err) {
-    pendingContainer.innerHTML = "<p>Error loading data</p>"
+    pendingContainer.innerHTML = "<p>Error loading data</p>";
   }
 }
 function renderPending(data) {
-    if(data.length === 0){
-        pendingContainer.innerHTML = "<p>No pending submissions</p>"
-    }
+  if (data.length === 0) {
+    pendingContainer.innerHTML = "<p>No pending submissions</p>";
+    return;
+  }
   pendingContainer.innerHTML = "";
   data.forEach((item) => {
     const card = document.createElement("div");
@@ -36,11 +37,15 @@ function renderPending(data) {
 document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("approve")) {
     const id = e.target.dataset.id;
-    await handleAction(id, "approve");
+    if (confirm("Approve this submission?")) {
+      await handleAction(id, "approve");
+    }
   }
   if (e.target.classList.contains("reject")) {
     const id = e.target.dataset.id;
-    await handleAction(id, "reject");
+    if (confirm("Reject this submission?")) {
+      await handleAction(id, "reject");
+    }
   }
 });
 async function handleAction(id, action) {
@@ -58,12 +63,13 @@ async function handleAction(id, action) {
 }
 const table = document.querySelector("table");
 async function loadHistory() {
+  table.innerHTML = `<tr><td colspan="5">Loading...</td></tr>`;
   try {
-    const res = await fetch("https://plastic-rrr.onrender.com/admin/history");
+    const res = await fetch(`${BASE_URL}/admin/history`);
     const data = await res.json();
     renderHistory(data);
   } catch (err) {
-    console.error("Error loading history:", err);
+    table.innerHTML = `<tr><td colspan="5">Error loading data</td></tr>`;
   }
 }
 function renderHistory(data) {
@@ -76,6 +82,12 @@ function renderHistory(data) {
     <th>Status</th>
     </tr>
     `;
+  if (data.length === 0) {
+    const row = document.createElement("tr");
+    row.innerHTML = `<td colspan="5">No history available</td>`;
+    table.appendChild(row);
+    return;
+  }
   data.forEach((item) => {
     const row = document.createElement("tr");
     row.innerHTML = `
@@ -93,10 +105,4 @@ if (pendingContainer) {
 }
 if (table) {
   loadHistory();
-}
-if(e.target.classList.contains("approve")){
-    const id = e.target.dataset.id
-    if(confirm("Approve this submission?")){
-        await handleAction(id, "approve")
-    }
 }
