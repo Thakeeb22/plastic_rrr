@@ -1,5 +1,5 @@
 const BASE_URL = "https://plastic-rrr.onrender.com";
-
+const REFRESH_INTERVAL = 5000
 const pendingContainer = document.querySelector(".pending");
 async function loadPending() {
   pendingContainer.innerHTML = "<p>Loading...</p>";
@@ -102,7 +102,9 @@ function renderHistory(data) {
 }
 if (pendingContainer) {
   loadPending();
+  setInterval(loadPending, REFRESH_INTERVAL)
 }
 if (table) {
   loadHistory();
+  setInterval(loadHistory, REFRESH_INTERVAL)
 }
