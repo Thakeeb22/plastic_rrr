@@ -286,7 +286,7 @@ app.post("/admin/login", async (req, res) => {
   if (!isMatch) {
     return res.json({ success: false });
   }
-  const token = jswt.sign({ username }, process.env.JWT_SECRET, {
+  const token = jwt.sign({ username }, process.env.JWT_SECRET, {
     expiresIn: "1d",
   });
   res.json({ success: true, token });
