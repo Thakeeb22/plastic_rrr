@@ -121,6 +121,13 @@ main {
   border: 2px solid var(--success);
   padding: 20px;
   border-radius: 20px;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.info-card>i{
+  font-size: 2em;
 }
 .pending-submissions {
   grid-area: card;
@@ -248,6 +255,20 @@ footer {
   justify-content: space-evenly;
   color: var(--success-bg);
   padding: 20px;
+}
+.status{
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.status.approved{
+  background: var(--success-bg);
+  color: var(--success);
+}
+.status.rejected{
+  background: var(--error-bg);
+  color: var(--error);
 }
 @media (max-width:765px) {
     .container{

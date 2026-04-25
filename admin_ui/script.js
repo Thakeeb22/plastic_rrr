@@ -1,16 +1,20 @@
-const { handle } = require("express/lib/application");
+const BASE_URL = "https://plastic-rrr.onrender.com";
 
 const pendingContainer = document.querySelector(".pending");
 async function loadPending() {
+    pendingContainer.innerHTML = "<p>Loading...</p>"
   try {
     const res = await fetch("https://plastic-rrr.onrender.com/admin/pending");
     const data = await res.json();
     renderPending(data);
   } catch (err) {
-    console.error("Error loading pending:", err);
+    pendingContainer.innerHTML = "<p>Error loading data</p>"
   }
 }
 function renderPending(data) {
+    if(data.length === 0){
+        pendingContainer.innerHTML = "<p>No pending submissions</p>"
+    }
   pendingContainer.innerHTML = "";
   data.forEach((item) => {
     const card = document.createElement("div");
@@ -28,20 +32,20 @@ function renderPending(data) {
     pendingContainer.appendChild(card);
   });
 }
-loadPending();
+// loadPending();
 document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("approve")) {
     const id = e.target.dataset.id;
-    await handleAcion(id, "approve");
+    await handleAction(id, "approve");
   }
   if (e.target.classList.contains("reject")) {
     const id = e.target.dataset.id;
-    await handleAcion(id, "reject");
+    await handleAction(id, "reject");
   }
 });
 async function handleAction(id, action) {
   try {
-    const res = await fetch(`/admin/${action}/${id}`, {
+    const res = await fetch(`${BASE_URL}/admin/${action}/${id}`, {
       method: "POST",
     });
     const data = await res.json();
@@ -62,8 +66,8 @@ async function loadHistory() {
     console.error("Error loading history:", err);
   }
 }
-function renderHistory(data){
-    table.innerHTML=`
+function renderHistory(data) {
+  table.innerHTML = `
     <tr>
     <th>Profile Code</th>
     <th>Contact</th>
@@ -71,17 +75,28 @@ function renderHistory(data){
     <th>Time Stamp</th>
     <th>Status</th>
     </tr>
-    `
-    data.forEach(item =>{
-        const row = document.createElement("tr")
-        row.innerHTML=`
+    `;
+  data.forEach((item) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
         <td>${item.profileCode}</td>
         <td>${item.phone}</td>
         <td>${item.weight}</td>
         <td>${new Date(item.createdAt).toLocaleString()}</td>
-        <td>${item.status}</td>
-        `
-        table.appendChild(row)
-    })
+        <td><span class="status ${item.status.toLowerCase()}">${item.status}</span></td>
+        `;
+    table.appendChild(row);
+  });
 }
-loadHistory()
+if (pendingContainer) {
+  loadPending();
+}
+if (table) {
+  loadHistory();
+}
+if(e.target.classList.contains("approve")){
+    const id = e.target.dataset.id
+    if(confirm("Approve this submission?")){
+        await handleAction(id, "approve")
+    }
+}
