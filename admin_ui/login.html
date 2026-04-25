@@ -26,40 +26,15 @@
   <body>
     <div class="container">
       <header>
-        <h1>PLASTIC RRR ADMIN</h1>
-        <a href="./history.html">View History</a>
-        <button id="logout">Logout</button>
+        <h1>PLASTIC RRR ADMIN LOGIN</h1>
       </header>
       <main>
         <div class="main-container">
-          <h1>Admin Dashboard</h1>
-          <div class="total-info">
-            <div class="info-card">
-              <i class="fa-solid fa-layer-group"></i>
-              <small>Total Submissions</small>
-              <p>10</p>
-            </div>
-            <div class="info-card">
-              <i class="fa-solid fa-circle-check"></i>
-              <small>Total Approved</small>
-              <p>8</p>
-            </div>
-            <div class="info-card">
-              <i class="fa-solid fa-circle-xmark"></i>
-              <small>Total Rejected</small>
-              <p>2</p>
-            </div>
-            <div class="info-card">
-              <i class="fa-solid fa-clipboard-check"></i>
-              <small>Total Plastic Collected (kg)</small>
-              <p>50 kg</p>
-            </div>
-          </div>
-          <div class="pending-submissions">
-            <h2>Pending Submissions</h2>
-            <div class="pending">
-              
-            </div>
+            <div class="login">
+          <input type="text" id="username" placeholder="Username" />
+          <input type="password" id="password" placeholder="Password" />
+          <button id="loginBtn">Login</button>
+          <p id="error" style="color: red"></p>
           </div>
         </div>
       </main>

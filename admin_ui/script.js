@@ -1,10 +1,17 @@
+const token = localStorage.getItem("token");
+if (!token) {
+  window.location.href = "login.html";
+}
 const BASE_URL = "https://plastic-rrr.onrender.com";
-const REFRESH_INTERVAL = 5000
+const REFRESH_INTERVAL = 5000;
 const pendingContainer = document.querySelector(".pending");
 async function loadPending() {
   pendingContainer.innerHTML = "<p>Loading...</p>";
   try {
     const res = await fetch(`${BASE_URL}/admin/pending`);
+    headers:{
+        Authorization: `Bearer ${token}`
+    }
     const data = await res.json();
     renderPending(data);
   } catch (err) {
@@ -51,7 +58,11 @@ document.addEventListener("click", async (e) => {
 async function handleAction(id, action) {
   try {
     const res = await fetch(`${BASE_URL}/admin/${action}/${id}`, {
+        
       method: "POST",
+      headers:{
+        Authorization: `Bearer ${token}`
+    }
     });
     const data = await res.json();
     if (data.success) {
@@ -66,6 +77,9 @@ async function loadHistory() {
   table.innerHTML = `<tr><td colspan="5">Loading...</td></tr>`;
   try {
     const res = await fetch(`${BASE_URL}/admin/history`);
+    headers:{
+        Authorization: `Bearer ${token}`
+    }
     const data = await res.json();
     renderHistory(data);
   } catch (err) {
@@ -102,9 +116,13 @@ function renderHistory(data) {
 }
 if (pendingContainer) {
   loadPending();
-  setInterval(loadPending, REFRESH_INTERVAL)
+  setInterval(loadPending, REFRESH_INTERVAL);
 }
 if (table) {
   loadHistory();
-  setInterval(loadHistory, REFRESH_INTERVAL)
+  setInterval(loadHistory, REFRESH_INTERVAL);
 }
+document.getElementById("logout")?.addEventListener("click", ()=>{
+    localStorage.removeItem("token")
+    window.location.href = "login.html"
+})

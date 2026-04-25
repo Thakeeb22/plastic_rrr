@@ -1,3 +1,6 @@
+const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 const User = require("./models/User");
 const Transaction = require("./models/Transaction");
 require("dotenv").config();
@@ -10,6 +13,11 @@ const africastalking = Africastalking({
 });
 const sms = africastalking.SMS;
 const app = express();
+app.use(
+  cors({
+    origin: "*",
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 mongoose
@@ -148,7 +156,7 @@ app.post("/ussd", async (req, res) => {
 });
 // admin flow
 //  admin approve route
-app.post("/admin/approve", adminAuth, async (req, res) => {
+app.post("/admin/approve", auth, async (req, res) => {
   const { transactionId } = req.body;
   const transaction = await Transaction.findById(transactionId);
   if (!transaction || transaction.status !== "pending") {
@@ -174,7 +182,7 @@ app.post("/admin/approve", adminAuth, async (req, res) => {
   res.redirect(`/admin?password=${req.body.password}`);
 });
 // admin reject route
-app.post("/admin/reject", adminAuth, async (req, res) => {
+app.post("/admin/reject", auth, async (req, res) => {
   const { transactionId } = req.body;
   const transaction = await Transaction.findById(transactionId);
   if (!transaction || transaction.status !== "pending") {
@@ -195,11 +203,11 @@ app.post("/admin/reject", adminAuth, async (req, res) => {
   res.redirect(`/admin?password=${req.body.password}`);
 });
 // pending submissions
-app.get("/admin/pending", adminAuth, async (req, res) => {
+app.get("/admin/pending", auth, async (req, res) => {
   const transactions = await Transaction.find({ status: "pending" });
   res.json(transactions);
 });
-app.get("/admin", adminAuth, async (req, res) => {
+app.get("/admin", auth, async (req, res) => {
   const transactions = await Transaction.find({ status: "pending" });
   let html = `<h1>Pending Submissions</h1>
   <a href="/admin/history?password=${req.query.password}">View History</a>`;
@@ -248,7 +256,7 @@ function formatPhone(phone) {
   }
   return phone;
 }
-app.get("/admin/history", adminAuth, async (req, res) => {
+app.get("/admin/history", auth, async (req, res) => {
   const transactions = await Transaction.find({
     status: { $in: ["approved", "rejected"] },
   }).sort({ createdAt: -1 });
@@ -267,17 +275,32 @@ app.get("/admin/history", adminAuth, async (req, res) => {
   });
   res.send(html);
 });
-function adminAuth(req, res, next) {
-  const password = (req.query && req.query.password) || (req.body && req.body.password)
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return res.send(`
-      <h2>Admin Login</h2>
-      <form method="GET" action="/admin">
-      <input type="password" name="password" placeholder="Enter Password"/>
-      <button type="submit">Login</button>
-      </form>
-      `);
-    
+app.post("/admin/login", async (req, res) => {
+  const { username, password } = req.body;
+  const ADMIN_USER = process.env.ADMIN_USER;
+  const ADMIN_PASS = process.env.ADMIN_PASS;
+  if (username !== ADMIN_USER) {
+    return res.json({ success: false });
   }
-  next();
+  const isMatch = await bcrypt.compare(password, ADMIN_PASS);
+  if (!isMatch) {
+    return res.json({ success: false });
+  }
+  const token = jswt.sign({ username }, process.env.JWT_SECRET, {
+    expiresIn: "1d",
+  });
+  res.json({ success: true, token });
+});
+function auth(req, res, next) {
+  const header = req.headers.authorization;
+  if (!header) {
+    return res.status(401).json({ success: false, message: "No token" });
+  }
+  const token = header.split(" ")[1];
+  try {
+    jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch (err) {
+    return res.status(401).json({ success: false, message: "Invalid token" });
+  }
 }
