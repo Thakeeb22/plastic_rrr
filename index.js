@@ -303,3 +303,4 @@ app.post("/admin/login", async (req, res) => {
 
   res.json({ success: true, token });
 });
+bcrypt.hash("1234", 10)
