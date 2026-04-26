@@ -157,10 +157,10 @@ app.post("/ussd", async (req, res) => {
 // admin flow
 //  admin approve route
 app.post("/admin/approve/:id", auth, async (req, res) => {
-  const { transactionId } = req.body;
-  const transaction = await Transaction.findById(transactionId);
+  const {id} = req.params;
+  const transaction = await Transaction.findById(id);
   if (!transaction || transaction.status !== "pending") {
-    return res.send("Already processed or not found");
+    return res.json({success: false, message: "Already processed or not found"});
   }
   transaction.status = "approved";
   await transaction.save();
@@ -179,14 +179,14 @@ app.post("/admin/approve/:id", auth, async (req, res) => {
   } catch (e) {
     console.log("SMS failed but continuing with approval process", e);
   }
-  res.redirect(`/admin?password=${req.body.password}`);
+  res.json({success: true, message: "Submission approved and user points updated" });
 });
 // admin reject route
-app.post("/admin/reject/:", auth, async (req, res) => {
-  const { transactionId } = req.body;
-  const transaction = await Transaction.findById(transactionId);
+app.post("/admin/reject/:id", auth, async (req, res) => {
+  const { id } = req.params;
+  const transaction = await Transaction.findById(id);
   if (!transaction || transaction.status !== "pending") {
-    return res.send("Already processed or not found");
+    return res.json({success:false, message: "Already processed or not found"});
   }
   transaction.status = "rejected";
   await transaction.save();
@@ -200,7 +200,7 @@ app.post("/admin/reject/:", auth, async (req, res) => {
   } catch (e) {
     console.log("SMS failed but continuing with approval process", e);
   }
-  res.redirect(`/admin?password=${req.body.password}`);
+  res.json({success: true, message: "Submission rejected and user notified" });
 });
 // pending submissions
 app.get("/admin/pending", auth, async (req, res) => {
@@ -260,20 +260,8 @@ app.get("/admin/history", auth, async (req, res) => {
   const transactions = await Transaction.find({
     status: { $in: ["approved", "rejected"] },
   }).sort({ createdAt: -1 });
-  let html = `<h1>Transaction History</h1>
-  <a href="/admin?password=${req.query.password}">Back to Pending</a>`;
-  transactions.forEach((t) => {
-    html += `
-    <div style="border:1px solid #ccc; padding:10px; margin:10px">
-    <p><b>Profile Code:</b> ${t.profileCode}</p>
-    <p><b>Phone:</b> ${t.phone}</p>
-    <p><b>Weight:</b> ${t.userWeight} kg</p>
-    <p><b>Status:</b> ${t.status}</p>
-    <p><b>Time:</b> ${new Date(t.createdAt).toLocaleString()}</p>
-    </div>
-    `;
-  });
-  res.send(html);
+  
+  res.json(transactions);
 });
 app.post("/admin/login", async (req, res) => {
   const { username, password } = req.body;

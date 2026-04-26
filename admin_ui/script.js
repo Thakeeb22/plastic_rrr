@@ -1,11 +1,12 @@
 const token = localStorage.getItem("token");
-if (!token) {
+if (!token && !window.location.href.includes("login.html")) {
   window.location.href = "login.html";
 }
 const BASE_URL = "https://plastic-rrr.onrender.com";
 const REFRESH_INTERVAL = 5000;
 const pendingContainer = document.querySelector(".pending");
 async function loadPending() {
+  if (!pendingContainer) return;
   pendingContainer.innerHTML = "<p>Loading...</p>";
   try {
     const res = await fetch(`${BASE_URL}/admin/pending`, {
@@ -32,11 +33,11 @@ function renderPending(data) {
     card.innerHTML = `
         <h2>Profile Code: ${item.profileCode}</h2>
         <h3>Phone Number: ${item.phone}</h3>
-        <small>Submitted Weight: ${item.weight}kg</small>
+        <small>Submitted Weight: ${item.userWeight}kg</small>
         <small>Date/Time: ${new Date(item.createdAt).toLocaleString()}</small>
         <div class="btns">
-        <button class="approve" data-id="${item.id}">Approve</button>
-        <button class="reject" data-id="${item.id}">Reject</button>
+        <button class="approve" data-id="${item._id}">Approve</button>
+        <button class="reject" data-id="${item._id}">Reject</button>  
         </div>
         `;
     pendingContainer.appendChild(card);
@@ -70,21 +71,19 @@ async function handleAction(id, action) {
       loadPending();
     }
   } catch (err) {
-    console.error(`${action} error:`, err);
+    console.error(err);
   }
 }
 const table = document.querySelector("table");
 async function loadHistory() {
+  if(!table) return
   table.innerHTML = `<tr><td colspan="5">Loading...</td></tr>`;
   try {
     const res = await fetch(`${BASE_URL}/admin/history`, {
-         headers:{
-        Authorization: `Bearer ${token}`
-    }
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
-    headers: {
-      Authorization: `Bearer ${token}`;
-    }
     const data = await res.json();
     renderHistory(data);
   } catch (err) {
@@ -112,7 +111,7 @@ function renderHistory(data) {
     row.innerHTML = `
         <td>${item.profileCode}</td>
         <td>${item.phone}</td>
-        <td>${item.weight}</td>
+        <td>${item.userWeight}</td>
         <td>${new Date(item.createdAt).toLocaleString()}</td>
         <td><span class="status ${item.status.toLowerCase()}">${item.status}</span></td>
         `;
