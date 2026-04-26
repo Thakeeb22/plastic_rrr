@@ -1,5 +1,5 @@
 const token = localStorage.getItem("token");
-if (!token && !window.location.href.includes("login.html")) {
+if (!token && window.location.pathname !== "/login.html") {
   window.location.href = "login.html";
 }
 const BASE_URL = "https://plastic-rrr.onrender.com";
@@ -130,3 +130,28 @@ document.getElementById("logout")?.addEventListener("click", () => {
   localStorage.removeItem("token");
   window.location.href = "login.html";
 });
+async function loadStats() {
+  try {
+    const res = await fetch(`${BASE_URL}/admin/stats`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+
+    document.getElementById("totalSubmissions").textContent = data.total;
+    document.getElementById("totalApproved").textContent = data.approved;
+    document.getElementById("totalRejected").textContent = data.rejected;
+    document.getElementById("totalKg").textContent = data.totalKg + " kg";
+
+  } catch (err) {
+    console.error("Error loading stats:", err);
+  }
+}
+if (pendingContainer) {
+  loadPending();
+  loadStats(); // ✅ ADD THIS
+  setInterval(loadPending, REFRESH_INTERVAL);
+  setInterval(loadStats, REFRESH_INTERVAL); // ✅ AUTO REFRESH
+}

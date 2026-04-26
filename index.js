@@ -7,6 +7,14 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const Africastalking = require("africastalking");
+const rateLimit = require("express-rate-limit");
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+});
+
+app.use(limiter);
 const africastalking = Africastalking({
   apiKey: process.env.AT_API_KEY,
   username: process.env.AT_USERNAME,
@@ -157,10 +165,19 @@ app.post("/ussd", async (req, res) => {
 // admin flow
 //  admin approve route
 app.post("/admin/approve/:id", auth, async (req, res) => {
-  const {id} = req.params;
-  const transaction = await Transaction.findById(id);
+  const { id } = req.params;
+  try {
+    const transaction = await Transaction.findById(id);
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Transaction not found" });
+  }
   if (!transaction || transaction.status !== "pending") {
-    return res.json({success: false, message: "Already processed or not found"});
+    return res.json({
+      success: false,
+      message: "Already processed or not found",
+    });
   }
   transaction.status = "approved";
   await transaction.save();
@@ -179,14 +196,20 @@ app.post("/admin/approve/:id", auth, async (req, res) => {
   } catch (e) {
     console.log("SMS failed but continuing with approval process", e);
   }
-  res.json({success: true, message: "Submission approved and user points updated" });
+  res.json({
+    success: true,
+    message: "Submission approved and user points updated",
+  });
 });
 // admin reject route
 app.post("/admin/reject/:id", auth, async (req, res) => {
   const { id } = req.params;
   const transaction = await Transaction.findById(id);
   if (!transaction || transaction.status !== "pending") {
-    return res.json({success:false, message: "Already processed or not found"});
+    return res.json({
+      success: false,
+      message: "Already processed or not found",
+    });
   }
   transaction.status = "rejected";
   await transaction.save();
@@ -200,40 +223,40 @@ app.post("/admin/reject/:id", auth, async (req, res) => {
   } catch (e) {
     console.log("SMS failed but continuing with approval process", e);
   }
-  res.json({success: true, message: "Submission rejected and user notified" });
+  res.json({ success: true, message: "Submission rejected and user notified" });
 });
 // pending submissions
 app.get("/admin/pending", auth, async (req, res) => {
   const transactions = await Transaction.find({ status: "pending" });
   res.json(transactions);
 });
-app.get("/admin", auth, async (req, res) => {
-  const transactions = await Transaction.find({ status: "pending" });
-  let html = `<h1>Pending Submissions</h1>
-  <a href="/admin/history?password=${req.query.password}">View History</a>`;
-  transactions.forEach((t) => {
-    html += `
-        <div style="border:1px solid #ccc; padding:10px; margin:10px">
-        <p><b>Profile Code:</b> ${t.profileCode}</p>
-        <p><b>Phone:</b> ${t.phone}</p>
-        <p><b>Submitted:</b> ${t.userWeight} kg</p>
-        <p><b>Time: </b> ${new Date(t.createdAt).toLocaleString()}</p>
+// app.get("/admin", auth, async (req, res) => {
+//   const transactions = await Transaction.find({ status: "pending" });
+//   let html = `<h1>Pending Submissions</h1>
+//   <a href="/admin/history?password=${req.query.password}">View History</a>`;
+//   transactions.forEach((t) => {
+//     html += `
+//         <div style="border:1px solid #ccc; padding:10px; margin:10px">
+//         <p><b>Profile Code:</b> ${t.profileCode}</p>
+//         <p><b>Phone:</b> ${t.phone}</p>
+//         <p><b>Submitted:</b> ${t.userWeight} kg</p>
+//         <p><b>Time: </b> ${new Date(t.createdAt).toLocaleString()}</p>
 
-        <form method="POST" action="/admin/approve?password=${req.query.password}" style="display:inline;">
-        <input type="hidden" name="transactionId" value="${t._id}"/>
-        <input type="hidden" name="password" value="${req.query.password}"/>
-        <button type="submit">Approve</button>
-        </form>
+//         <form method="POST" action="/admin/approve?password=${req.query.password}" style="display:inline;">
+//         <input type="hidden" name="transactionId" value="${t._id}"/>
+//         <input type="hidden" name="password" value="${req.query.password}"/>
+//         <button type="submit">Approve</button>
+//         </form>
 
-        <form method="POST" action="/admin/reject?password=${req.query.password}" style="display:inline;">
-        <input type="hidden" name="transactionId" value="${t._id}"/>
-        <input type="hidden" name="password" value="${req.query.password}"/>
-        <button type="submit">Reject</button>
-        </form>
-        </div>`;
-  });
-  res.send(html);
-});
+//         <form method="POST" action="/admin/reject?password=${req.query.password}" style="display:inline;">
+//         <input type="hidden" name="transactionId" value="${t._id}"/>
+//         <input type="hidden" name="password" value="${req.query.password}"/>
+//         <button type="submit">Reject</button>
+//         </form>
+//         </div>`;
+//   });
+//   res.send(html);
+// });
 // SMS function
 async function sendSMS(to, message) {
   try {
@@ -260,11 +283,14 @@ app.get("/admin/history", auth, async (req, res) => {
   const transactions = await Transaction.find({
     status: { $in: ["approved", "rejected"] },
   }).sort({ createdAt: -1 });
-  
+
   res.json(transactions);
 });
 app.post("/admin/login", async (req, res) => {
   const { username, password } = req.body;
+  if (!username || !password) {
+    return res.json({ success: false, message: "All fields required" });
+  }
   const ADMIN_USER = process.env.ADMIN_USER;
   const ADMIN_PASS = process.env.ADMIN_PASS;
   if (username !== ADMIN_USER) {
@@ -274,21 +300,46 @@ app.post("/admin/login", async (req, res) => {
   if (!isMatch) {
     return res.json({ success: false });
   }
-  const token = jwt.sign({ username }, process.env.JWT_SECRET, {
+  const token = jwt.sign({ username, role: "admin" }, process.env.JWT_SECRET, {
     expiresIn: "1d",
   });
   res.json({ success: true, token });
 });
 function auth(req, res, next) {
   const header = req.headers.authorization;
+
   if (!header) {
     return res.status(401).json({ success: false, message: "No token" });
   }
+
   const token = header.split(" ")[1];
+
   try {
-    jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decoded.role !== "admin") {
+      return res.status(403).json({ success: false });
+    }
+
     next();
   } catch (err) {
     return res.status(401).json({ success: false, message: "Invalid token" });
   }
 }
+app.get("/admin/stats", auth, async (req, res) => {
+  const total = await Transaction.countDocuments();
+  const approved = await Transaction.countDocuments({ status: "approved" });
+  const rejected = await Transaction.countDocuments({ status: "rejected" });
+
+  const totalKg = await Transaction.aggregate([
+    { $match: { status: "approved" } },
+    { $group: { _id: null, total: { $sum: "$userWeight" } } },
+  ]);
+
+  res.json({
+    total,
+    approved,
+    rejected,
+    totalKg: totalKg[0]?.total || 0,
+  });
+});
