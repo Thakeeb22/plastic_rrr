@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const express = require("express");
 
+const app = express();
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
@@ -12,38 +13,30 @@ const rateLimit = require("express-rate-limit");
 const User = require("./models/User");
 const Transaction = require("./models/Transaction");
 
-
-
 const africastalking = Africastalking({
   apiKey: process.env.AT_API_KEY,
   username: process.env.AT_USERNAME,
 });
 const sms = africastalking.SMS;
 
-
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
 });
-
 
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(limiter);
 
-
-
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB Connected Successfully"))
   .catch((err) => console.log(err));
 
-
 app.get("/", (req, res) => {
   res.send("Plastic RRR server running");
 });
-
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
@@ -103,26 +96,18 @@ app.post("/ussd", async (req, res) => {
     response = `CON Welcome to Plastic RRR
 1. Register
 2. Login`;
-  }
-
-  else if (text === "1") {
+  } else if (text === "1") {
     response = `CON Enter your name`;
-  }
-
-  else if (data[0] === "1" && data.length === 2) {
+  } else if (data[0] === "1" && data.length === 2) {
     response = `CON Enter your address`;
-  }
-
-  else if (data[0] === "1" && data.length === 3) {
+  } else if (data[0] === "1" && data.length === 3) {
     response = `CON Select collection point:
 1. Lugbe 1
 2. Lugbe 2
 3. Lugbe 3
 4. Lugbe 4
 5. Lugbe 5`;
-  }
-
-  else if (data[0] === "1" && data.length === 4) {
+  } else if (data[0] === "1" && data.length === 4) {
     const [_, name, address, point] = data;
 
     const existingUser = await User.findOne({ phone: phoneNumber });
@@ -143,13 +128,9 @@ app.post("/ussd", async (req, res) => {
       response = `END Registration successful
 Profile Code: ${profileCode}`;
     }
-  }
-
-  else if (text === "2") {
+  } else if (text === "2") {
     response = `CON Enter your profile code`;
-  }
-
-  else if (data[0] === "2" && data.length === 2) {
+  } else if (data[0] === "2" && data.length === 2) {
     const user = await User.findOne({
       profileCode: data[1],
       phone: phoneNumber,
@@ -162,13 +143,9 @@ Profile Code: ${profileCode}`;
 1. Submit Plastic
 2. View Points`;
     }
-  }
-
-  else if (data[0] === "2" && data[2] === "1" && data.length === 3) {
+  } else if (data[0] === "2" && data[2] === "1" && data.length === 3) {
     response = `CON Enter Plastic quantity (kg)`;
-  }
-
-  else if (data[0] === "2" && data[2] === "1" && data.length === 4) {
+  } else if (data[0] === "2" && data[2] === "1" && data.length === 4) {
     const weight = Number(data[3]);
 
     if (isNaN(weight) || weight <= 0) {
@@ -201,20 +178,14 @@ Profile Code: ${profileCode}`;
         response = `END Submission received`;
       }
     }
-  }
-
-  else if (data[0] === "2" && data[2] === "2") {
+  } else if (data[0] === "2" && data[2] === "2") {
     const user = await User.findOne({
       profileCode: data[1],
       phone: phoneNumber,
     });
 
-    response = user
-      ? `END Points: ${user.points}`
-      : `END User not found`;
-  }
-
-  else {
+    response = user ? `END Points: ${user.points}` : `END User not found`;
+  } else {
     response = `END Invalid option`;
   }
 
@@ -249,12 +220,11 @@ app.post("/admin/approve/:id", auth, async (req, res) => {
 
   await sendSMS(
     formatPhone(user.phone),
-    `Approved: ${transaction.userWeight}kg → ${points} points`
+    `Approved: ${transaction.userWeight}kg → ${points} points`,
   );
 
   res.json({ success: true });
 });
-
 
 // Reject
 app.post("/admin/reject/:id", auth, async (req, res) => {
@@ -269,19 +239,17 @@ app.post("/admin/reject/:id", auth, async (req, res) => {
 
   await sendSMS(
     formatPhone(transaction.phone),
-    `Rejected: ${transaction.userWeight}kg`
+    `Rejected: ${transaction.userWeight}kg`,
   );
 
   res.json({ success: true });
 });
-
 
 // Pending
 app.get("/admin/pending", auth, async (req, res) => {
   const data = await Transaction.find({ status: "pending" });
   res.json(data);
 });
-
 
 // History
 app.get("/admin/history", auth, async (req, res) => {
@@ -291,7 +259,6 @@ app.get("/admin/history", auth, async (req, res) => {
 
   res.json(data);
 });
-
 
 // Stats
 app.get("/admin/stats", auth, async (req, res) => {
@@ -312,7 +279,6 @@ app.get("/admin/stats", auth, async (req, res) => {
   });
 });
 
-
 // Admin Login
 app.post("/admin/login", async (req, res) => {
   const { username, password } = req.body;
@@ -331,11 +297,9 @@ app.post("/admin/login", async (req, res) => {
     return res.json({ success: false });
   }
 
-  const token = jwt.sign(
-    { username, role: "admin" },
-    process.env.JWT_SECRET,
-    { expiresIn: "1d" }
-  );
+  const token = jwt.sign({ username, role: "admin" }, process.env.JWT_SECRET, {
+    expiresIn: "1d",
+  });
 
   res.json({ success: true, token });
 });
