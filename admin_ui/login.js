@@ -4,6 +4,9 @@ const error = document.getElementById("error")
 btn.addEventListener("click", async ()=>{
     const username = document.getElementById("username").value
     const password = document.getElementById("password").value
+    btn.textContent = "Logging in..."
+    btn.disabled =  true
+    error.textContent
     try{
         const res = await fetch(`${BASE_URL}/admin/login`, {
             method ="POST",
@@ -22,4 +25,6 @@ btn.addEventListener("click", async ()=>{
     }catch(err){
         error.textContent = "Server error"
     }
+    btn.textContent = "Login"
+    btn.disabled = false
 })
