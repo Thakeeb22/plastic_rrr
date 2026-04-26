@@ -15,7 +15,7 @@ btn.addEventListener("click", async ()=>{
         const data = await res.json()
         if(data.success){
             localStorage.setItem("token", data.token)
-            window.location.herf = "index.html"
+            window.location.href = "index.html"
         }else{
             error.textContent = "Invalid credentials"
         }

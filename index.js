@@ -156,7 +156,7 @@ app.post("/ussd", async (req, res) => {
 });
 // admin flow
 //  admin approve route
-app.post("/admin/approve", auth, async (req, res) => {
+app.post("/admin/approve/:id", auth, async (req, res) => {
   const { transactionId } = req.body;
   const transaction = await Transaction.findById(transactionId);
   if (!transaction || transaction.status !== "pending") {
@@ -182,7 +182,7 @@ app.post("/admin/approve", auth, async (req, res) => {
   res.redirect(`/admin?password=${req.body.password}`);
 });
 // admin reject route
-app.post("/admin/reject", auth, async (req, res) => {
+app.post("/admin/reject/:", auth, async (req, res) => {
   const { transactionId } = req.body;
   const transaction = await Transaction.findById(transactionId);
   if (!transaction || transaction.status !== "pending") {

@@ -8,10 +8,12 @@ const pendingContainer = document.querySelector(".pending");
 async function loadPending() {
   pendingContainer.innerHTML = "<p>Loading...</p>";
   try {
-    const res = await fetch(`${BASE_URL}/admin/pending`);
-    headers:{
-        Authorization: `Bearer ${token}`
-    }
+    const res = await fetch(`${BASE_URL}/admin/pending`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
     const data = await res.json();
     renderPending(data);
   } catch (err) {
@@ -58,11 +60,10 @@ document.addEventListener("click", async (e) => {
 async function handleAction(id, action) {
   try {
     const res = await fetch(`${BASE_URL}/admin/${action}/${id}`, {
-        
       method: "POST",
-      headers:{
-        Authorization: `Bearer ${token}`
-    }
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     const data = await res.json();
     if (data.success) {
@@ -76,9 +77,13 @@ const table = document.querySelector("table");
 async function loadHistory() {
   table.innerHTML = `<tr><td colspan="5">Loading...</td></tr>`;
   try {
-    const res = await fetch(`${BASE_URL}/admin/history`);
-    headers:{
+    const res = await fetch(`${BASE_URL}/admin/history`, {
+         headers:{
         Authorization: `Bearer ${token}`
+    }
+    });
+    headers: {
+      Authorization: `Bearer ${token}`;
     }
     const data = await res.json();
     renderHistory(data);
@@ -122,7 +127,7 @@ if (table) {
   loadHistory();
   setInterval(loadHistory, REFRESH_INTERVAL);
 }
-document.getElementById("logout")?.addEventListener("click", ()=>{
-    localStorage.removeItem("token")
-    window.location.href = "login.html"
-})
+document.getElementById("logout")?.addEventListener("click", () => {
+  localStorage.removeItem("token");
+  window.location.href = "login.html";
+});
