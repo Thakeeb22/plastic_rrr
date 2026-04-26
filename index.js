@@ -165,7 +165,8 @@ Profile Code: ${profileCode}`;
         });
 
         if (existing) {
-          return res.send("END You already have a pending submission");
+          response = `END You already have a pending submission`;
+          return res.send(response);
         }
 
         await Transaction.create({
@@ -213,6 +214,9 @@ app.post("/admin/approve/:id", auth, async (req, res) => {
 
   const user = await User.findOne({ phone: transaction.phone });
 
+  if (!user) {
+    return res.json({ success: false, message: "User not found" });
+  }
   const points = transaction.userWeight * 100;
   user.points += points;
   user.totalPoints += points;
@@ -284,23 +288,21 @@ app.post("/admin/login", async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res.json({ success: false });
+    return res.json({ success: false, message: "Missing fields" });
   }
 
-  if (username !== process.env.ADMIN_USER) {
-    return res.json({ success: false });
+  if (
+    username !== process.env.ADMIN_USER ||
+    password !== process.env.ADMIN_PASS
+  ) {
+    return res.json({ success: false, message: "Invalid credentials" });
   }
 
-  const isMatch = await bcrypt.compare(password, process.env.ADMIN_PASS);
-
-  if (!isMatch) {
-    return res.json({ success: false });
-  }
-
-  const token = jwt.sign({ username, role: "admin" }, process.env.JWT_SECRET, {
-    expiresIn: "1d",
-  });
+  const token = jwt.sign(
+    { username, role: "admin" },
+    process.env.JWT_SECRET,
+    { expiresIn: "1d" }
+  );
 
   res.json({ success: true, token });
 });
-bcrypt.hash("1234", 10)
