@@ -224,7 +224,10 @@ app.post("/admin/approve/:id", auth, async (req, res) => {
 
   await sendSMS(
     formatPhone(user.phone),
-    `Approved: ${transaction.userWeight}kg → ${points} points`,
+    `You have successfully deposited ${transaction.userWeight} kg of plastic.
+    You have earned ${points} points.
+    Your total points are now ${user.totalPoints}.
+    Thank you for helping reduce plastic waste in the planet`,
   );
 
   res.json({ success: true });
@@ -243,7 +246,9 @@ app.post("/admin/reject/:id", auth, async (req, res) => {
 
   await sendSMS(
     formatPhone(transaction.phone),
-    `Rejected: ${transaction.userWeight}kg`,
+    `Your plastic submission of ${transaction.userWeight} kg was rejected.
+    Please ensure you enter the correct weight next time.
+    Thank you for helping reduce plastic waste in the planet`,
   );
 
   res.json({ success: true });
@@ -298,11 +303,9 @@ app.post("/admin/login", async (req, res) => {
     return res.json({ success: false, message: "Invalid credentials" });
   }
 
-  const token = jwt.sign(
-    { username, role: "admin" },
-    process.env.JWT_SECRET,
-    { expiresIn: "1d" }
-  );
+  const token = jwt.sign({ username, role: "admin" }, process.env.JWT_SECRET, {
+    expiresIn: "1d",
+  });
 
   res.json({ success: true, token });
 });
