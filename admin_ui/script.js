@@ -5,9 +5,16 @@ if (!token && window.location.pathname !== "/login.html") {
 const BASE_URL = "https://plastic-rrr.onrender.com";
 const REFRESH_INTERVAL = 5000;
 const pendingContainer = document.querySelector(".pending");
+let isFirstLoad = true;
+
 async function loadPending() {
   if (!pendingContainer) return;
-  pendingContainer.innerHTML = "<p>Loading...</p>";
+
+  // Show loading ONLY first time
+  if (isFirstLoad) {
+    pendingContainer.innerHTML = "<p>Loading...</p>";
+  }
+
   try {
     const res = await fetch(`${BASE_URL}/admin/pending`, {
       headers: {
@@ -16,30 +23,46 @@ async function loadPending() {
     });
 
     const data = await res.json();
+
     renderPending(data);
+
+    isFirstLoad = false; // after first successful load
   } catch (err) {
-    pendingContainer.innerHTML = "<p>Error loading data</p>";
+    if (isFirstLoad) {
+      pendingContainer.innerHTML = "<p>Error loading data</p>";
+    }
   }
 }
+let lastData = [];
+
 function renderPending(data) {
+  // Compare new data with old
+  if (JSON.stringify(data) === JSON.stringify(lastData)) {
+    return; // 🚀 no change → no re-render
+  }
+
+  lastData = data;
+
   if (data.length === 0) {
     pendingContainer.innerHTML = "<p>No pending submissions</p>";
     return;
   }
+
   pendingContainer.innerHTML = "";
+
   data.forEach((item) => {
     const card = document.createElement("div");
     card.classList.add("pending-card");
     card.innerHTML = `
-        <h2>Profile Code: ${item.profileCode}</h2>
-        <h3>Phone Number: ${item.phone}</h3>
-        <small>Submitted Weight: ${item.userWeight}kg</small>
-        <small>Date/Time: ${new Date(item.createdAt).toLocaleString()}</small>
-        <div class="btns">
+      <h2>Profile Code: ${item.profileCode}</h2>
+      <h3>Phone Number: ${item.phone}</h3>
+      <small>Submitted Weight: ${item.userWeight}kg</small>
+      <small>Date/Time: ${new Date(item.createdAt).toLocaleString()}</small>
+      <div class="btns">
         <button class="approve" data-id="${item._id}">Approve</button>
         <button class="reject" data-id="${item._id}">Reject</button>  
-        </div>
-        `;
+      </div>
+    `;
     pendingContainer.appendChild(card);
   });
 }
