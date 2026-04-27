@@ -148,9 +148,12 @@ async function loadStats() {
     console.error("Error loading stats:", err);
   }
 }
+// Load pending ONLY if it exists
 if (pendingContainer) {
   loadPending();
-  loadStats(); 
   setInterval(loadPending, REFRESH_INTERVAL);
-  setInterval(loadStats, REFRESH_INTERVAL); // 
 }
+
+// Load stats on ALL pages
+loadStats();
+setInterval(loadStats, REFRESH_INTERVAL);
