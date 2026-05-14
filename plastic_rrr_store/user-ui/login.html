@@ -3,7 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ADMIN DASHBOARD</title>
     <link rel="stylesheet" href="./style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -22,23 +21,34 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
     />
+    <title>Login</title>
   </head>
   <body>
-    <div class="container">
+    <div class="main-container">
       <header>
-        <h1>PLASTIC RRR ADMIN LOGIN</h1>
+        <div class="head">
+          <h1>Plastic RRR Store Login</h1>
+        </div>
       </header>
       <main>
-        <div class="main-container">
-            <div class="login">
-          <input type="text" id="username" placeholder="Username" />
-          <input type="password" id="password" placeholder="Password" />
-          <button id="loginBtn">Login</button>
-          <p id="error" style="color: red"></p>
+        <div class="products login_box">
+          <div class="box">
+            <h1>LOGIN</h1>
+            <form action="">
+              <input id="profileCode" type="text" placeholder="Enter your profile code ABC123" />
+              <input
+                type="tel"
+                id="phoneNumber"
+                placeholder="Enter your phone number 08012345678"
+              />
+              <button type="button" id="login-btn">
+                LOGIN<i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </form>
           </div>
         </div>
       </main>
-      <!-- <footer>&copy; PLASTIC RRR 2026. All Rights Reserved</footer> -->
+      <!-- <footer>&copy; All Rights Reserved. Plastic RRR</footer> -->
     </div>
     <script src="./login.js"></script>
   </body>

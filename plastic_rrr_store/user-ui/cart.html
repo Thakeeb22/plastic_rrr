@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="./style.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+    />
+
+    <title>Plastic RRR Cart</title>
+  </head>
+
+  <body>
+    <div class="main-container">
+
+      <header>
+        <div class="head">
+          <h1>Plastic RRR Store Cart</h1>
+
+          <button onclick="window.location.href='index.html'">
+            Back To Store
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <div class="cart-box">
+
+          <div class="head-span">
+            <h1>Your Cart</h1>
+            <p>Review all products before checkout</p>
+          </div>
+
+          <!-- CART ITEMS -->
+          <div class="cart-container"></div>
+
+          <!-- TOTAL SECTION -->
+          <div class="checkout-box">
+            <h2 id="cartTotal">Total: 0 Points</h2>
+
+            <button id="checkoutBtn">
+              Checkout
+            </button>
+          </div>
+
+        </div>
+      </main>
+
+      <footer>
+        &copy; Plastic RRR 2026. All Rights Reserved
+      </footer>
+
+    </div>
+
+    <script src="./cart.js"></script>
+  </body>
+</html>

@@ -225,9 +225,9 @@ app.post("/admin/approve/:id", auth, async (req, res) => {
   await sendSMS(
     formatPhone(user.phone),
     `You have successfully deposited ${transaction.userWeight} kg of plastic.
-    You have earned ${points} points.
-    Your total points are now ${user.totalPoints}.
-    Thank you for helping reduce plastic waste in the planet`,
+You have earned ${points} points.
+Your total points are now ${user.totalPoints}.
+Thank you for helping reduce plastic waste in the planet`,
   );
 
   res.json({ success: true });
@@ -248,7 +248,7 @@ app.post("/admin/reject/:id", auth, async (req, res) => {
     formatPhone(transaction.phone),
     `Your plastic submission of ${transaction.userWeight} kg was rejected.
     Please ensure you enter the correct weight next time.
-    Thank you for helping reduce plastic waste in the planet`,
+  Thank you for helping reduce plastic waste in the planet`,
   );
 
   res.json({ success: true });

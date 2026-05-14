@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plastic RRR Store Admin</title>
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+      integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+    />
+  </head>
+  <body>
+    <div class="main-container">
+      <header>
+        <div class="head">
+          <div class="navHead">
+            <h1>Plastic RRR Store Admin</h1>
+            <ul>
+              <li><a href="#">Orders</a></li>
+              <li><a href="#">Dashboard</a></li>
+            </ul>
+            <button id="logOut">Logout</button>
+          </div>
+          <div class="hero">
+            <h1>Welcome Admin</h1>
+            <p>
+              Track recycled plastic redemptions, update product inventory, and
+              monitor your environmental impact goals from this central
+              dashboard.
+            </p>
+          </div>
+        </div>
+      </header>
+      <main>
+        <div class="contents">
+          <!-- 1 -->
+          <div class="stats">
+            <div class="stat-card">
+              <span>
+                <p>Total Products</p>
+                <i class="fa-solid fa-warehouse"></i>
+              </span>
+              <h3>128</h3>
+            </div>
+
+            <div class="stat-card">
+              <span>
+                <p>Total Orders</p>
+                <i class="fa-solid fa-cart-shopping"></i>
+              </span>
+              <h3>128</h3>
+            </div>
+            <div class="stat-card">
+              <span>
+                <p>Redeemed Points</p>
+                <i class="fa-solid fa-recycle"></i>
+              </span>
+              <h3>128</h3>
+            </div>
+            <div class="stat-card">
+              <span>
+                <p>Pending Orders</p>
+                <i class="fa-solid fa-clipboard-list"></i>
+              </span>
+              <h3>128</h3>
+            </div>
+          </div>
+          <!-- 2 -->
+          <div class="add-new-prod">
+            <span>
+              <i class="fa-solid fa-plus"></i>
+              <h2>Add New Product</h2>
+            </span>
+            <form class="form">
+              <label for="product name">Name</label>
+              <input
+                type="text"
+                name="product name"
+                placeholder="Product Name..."
+              />
+              <span>
+                <label for="cost">Points Cost</label>
+                <input type="number" name="cost" placeholder="500" />
+                <label for="stock">Initial Stock</label>
+                <input type="number" name="stock" placeholder="25" />
+              </span>
+              <label for="url">Image Url</label>
+              <input type="url" name="url" placeholder="https://imagelink" />
+              <button type="submit">Create Product</button>
+            </form>
+          </div>
+          <!-- 3 -->
+          <div class="inventry-table">
+            <h3>Current Inventory</h3>
+            <div class="table-wrapper">
+              <table class="table">
+                <tr>
+                  <th>Product</th>
+                  <th>Points</th>
+                  <th>Stock</th>
+                  <th>Actions</th>
+                </tr>
+                <tr>
+                  <td>
+                    <span
+                      ><img src="./img/biros.jpg" alt="" />
+                      <p>Biro</p></span
+                    >
+                  </td>
+                  <td>500</td>
+                  <td>25</td>
+                  <td>
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <i class="fa-solid fa-trash-can delete"></i>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span
+                      ><img src="./img/biros.jpg" alt="" />
+                      <p>Biro</p></span
+                    >
+                  </td>
+                  <td>500</td>
+                  <td>25</td>
+                  <td>
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <i class="fa-solid fa-trash-can delete"></i>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+      <footer>&copy; All Rights Reserved. Plastic RRR</footer>
+    </div>
+    <script src="./script.js"></script>
+  </body>
+</html>
