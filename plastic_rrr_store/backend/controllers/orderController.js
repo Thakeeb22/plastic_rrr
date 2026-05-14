@@ -21,6 +21,11 @@ const createOrder = async (req, res) => {
       }
       totalPoints += product.points;
       // reduce stock
+      if(product.stock <=0){
+        return res.status(400).json({
+          message:`${product.name} is out of stock`
+        })
+      }
       product.stock -= 1;
       await product.save();
     }

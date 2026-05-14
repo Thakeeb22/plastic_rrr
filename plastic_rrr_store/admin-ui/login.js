@@ -3,8 +3,8 @@ const loginBtn = document.getElementById("login-btn");
 loginBtn.addEventListener("click", async (e) => {
   e.preventDefault();
 
-  const profileCode = document.getElementById("profileCode").value;
-  const phone = document.getElementById("phoneNumber").value;
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
 
   if (!profileCode || !phone) {
     alert("Please fill all fields");
@@ -20,8 +20,8 @@ loginBtn.addEventListener("click", async (e) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          profileCode,
-          phone,
+          username,
+          password,
         }),
       }
     );

@@ -42,61 +42,19 @@
       </header>
       <main>
         <div class="contents table-wrapper">
-          <table>
-            <tr>
-              <th>User & Contact</th>
-              <th>Profile Code</th>
-              <th>Products Ordered</th>
-              <th>Total Points</th>
-              <th>Order Date</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-            <tr>
-              <table>
-                <tr>
-                  <th>User & Contact</th>
-                  <th>Profile Code</th>
-                  <th>Products Ordered</th>
-                  <th>Total Points</th>
-                  <th>Order Date</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-
-                <tr>
-                  <td>
-                    <div class="user-info">
-                      <h4>Muhammad</h4>
-                      <p>08012345678</p>
-                    </div>
-                  </td>
-
-                  ```
-                  <td>THA203</td>
-
-                  <td>
-                    Notebook x2 <br />
-                    Socks x1
-                  </td>
-
-                  <td>1200</td>
-
-                  <td>May 7, 2026</td>
-
-                  <td>
-                    <span class="status pending"> Pending </span>
-                  </td>
-
-                  <td>
-                    <button class="deliver-btn">Deliver</button>
-
-                    <button class="delete-btn">Delete</button>
-                  </td>
-                  ```
-                </tr>
-              </table>
-            </tr>
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Profile Code</th>
+                <th>Products</th>
+                <th>Total Points</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody"></tbody>
           </table>
         </div>
       </main>

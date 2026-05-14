@@ -1,6 +1,7 @@
 const cartContainer = document.querySelector(".cart-container");
 const cartTotal = document.getElementById("cartTotal");
 const checkOutBtn = document.getElementById("checkoutBtn");
+const API_URL = "https://plastic-rrr.onrender.com";
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 function loadCart() {
   cartContainer.innerHTML = "";
@@ -37,36 +38,51 @@ function removeItem(index) {
   loadCart();
 }
 checkOutBtn.addEventListener("click", checkout);
-async function checkout() {
-  if (cart.length === 0) {
-    alert("cart is empty");
-    return;
-  }
-  try {
-    const user = JSON.parse(localStorage.getItem("userData"));
-    const response = await fetch("https://plastic-rrr.onrender.com/api/orders", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+async function checkout(){
+  try{
+    if(cart.length === 0){
+      alert("Cart is empty")
+      return
+    }
+    const user = JSON.parse(localStorage.getItem("userdata"))
+    if(!user){
+      alert("Please login first!!!!")
+      window.location.href = "login.html"
+      return
+    }
+    checkOutBtn.disabled = true
+    checkOutBtn.textContent = "Processing...."
+    const response = await fetch(`${API_URL}/api/orders`, {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
       },
-      body: JSON.stringify({
+      body:JSON.stringify({
         userId: user._id,
         cart,
-      }),
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      alert(data.message);
-      return;
+      })
+    })
+    const data = await response.json()
+    if(!response.ok){
+      alert(data.message)
+      checkOutBtn.disabled = false
+      checkOutBtn.textContent = "Checkout"
+      return
     }
-    alert("Order placed successfully!!!");
-    localStorage.removeItem("cart");
-    // update users point
-    user.points -= cart.reduce((total, item) => total + item.points, 0);
-    localStorage.setItem("userData", JSON.stringify(user));
-    window.location.href = "success.html";
-  } catch (error) {
-    alert("Checkout failed");
-    console.log(error);
+    // update local user points
+    const totalCartPoints = cart.reduce(
+      (total, item)=>total + item.points, 0
+    )
+    user.points -= totalCartPoints
+    localStorage.setItem("userData", JSON.stringify(user))
+    // clear cart
+    localStorage.removeItem("cart")
+    alert("Order placed successfully")
+    window.location.href = "success.html"
+  }catch (error){
+    console.log(error)
+    alert("Checkout failed!!!")
+    checkOutBtn.disabled=false
+    checkOutBtn.textContent = "Checkout"
   }
 }
