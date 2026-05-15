@@ -20,7 +20,7 @@ async function loadStats() {
     document.querySelectorAll(".stat-card h3")[1].textContent =
       data.totalOrders;
     document.querySelectorAll(".stat-card h3")[2].textContent =
-      data.totalredeemedPoints;
+      data.redeemedPoints;
     document.querySelectorAll(".stat-card h3")[3].textContent =
       data.pendingOrders;
   } catch (err) {
