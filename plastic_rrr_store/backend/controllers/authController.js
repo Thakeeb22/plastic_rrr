@@ -1,32 +1,34 @@
+const User = require("../models/User")
 const jwt = require("jsonwebtoken");
 const loginUser = async (req, res) => {
   try {
-    const { username, password } = req.body;
-    // check admin credentials
-    if (
-      username !== process.env.ADMIN_USER ||
-      password !== process.env.ADMIN_PASS
-    ) {
-      return res.status(401).json({
-        message: "Invalid Credentials",
-      });
+    let {profileCode, phone } = req.body
+    // normalize phone no.
+    if(phone.startWith("0")){
+      phone = "+234" + phone.slice(1)
     }
-    // create token
+    const user = await User.findOne({
+      profileCode,
+      phone,
+    })
+    if(!user){
+      return res.status(400).json({
+        message: "Invalid Credentials"
+      })
+    }
     const token = jwt.sign(
       {
-        username,
+        id: user._id,
       },
       process.env.JWT_SECRET,
       {
-        expiresIn: "7d",
-      },
-    );
+        expiresIn:"7d",
+      }
+    )
     res.json({
       token,
-      user: {
-        username,
-      },
-    });
+      user
+    })
   } catch (error) {
     res.status(500).json({
       message: error.message,
