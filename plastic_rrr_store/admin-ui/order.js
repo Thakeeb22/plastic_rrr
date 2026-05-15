@@ -23,7 +23,7 @@ async function loadOrders(){
             <td>${products}</td>
             <td>${order.totalPoints}</td>
             <td>
-            ${new Date(oreder.createdAt).toLocaleDateString()}</td>
+            ${new Date(order.createdAt).toLocaleDateString()}</td>
             <td>
             <span class="status pending">${order.status}</span>
             </td>
