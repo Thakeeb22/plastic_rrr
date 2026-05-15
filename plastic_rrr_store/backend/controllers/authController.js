@@ -4,7 +4,7 @@ const loginUser = async (req, res) => {
   try {
     let {profileCode, phone } = req.body
     // normalize phone no.
-    if(phone.startWith("0")){
+    if(phone.startsWith("0")){
       phone = "+234" + phone.slice(1)
     }
     const user = await User.findOne({
