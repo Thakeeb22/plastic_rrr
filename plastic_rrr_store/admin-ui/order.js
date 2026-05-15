@@ -1,5 +1,5 @@
 const API_URL = "https://plastic-rrr-store.onrender.com"
-const token = localStorage.getItem("adminTOken")
+const token = localStorage.getItem("adminToken")
 if(!token){
     window.location.href = "login.html"
 }
@@ -22,6 +22,8 @@ async function loadOrders(){
             <td>${order.user?.profileCode || "N/A"}</td>
             <td>${products}</td>
             <td>${order.totalPoints}</td>
+            <td>
+            ${new Date(oreder.createdAt).toLocaleDateString()}</td>
             <td>
             <span class="status pending">${order.status}</span>
             </td>

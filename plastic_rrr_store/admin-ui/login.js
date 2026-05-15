@@ -6,7 +6,7 @@ loginBtn.addEventListener("click", async (e) => {
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
 
-  if (!profileCode || !phone) {
+  if (!username || !password) {
     alert("Please fill all fields");
     return;
   }
@@ -33,7 +33,7 @@ loginBtn.addEventListener("click", async (e) => {
       return;
     }
 
-    localStorage.setItem("userToken", data.token);
+    localStorage.setItem("adminToken", data.token);
     localStorage.setItem("userData", JSON.stringify(data.user));
 
     alert("Login Successful");

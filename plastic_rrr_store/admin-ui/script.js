@@ -33,7 +33,7 @@ async function loadProducts() {
       </td>
       <td>${product.points}</td>
       <td>${product.stock}</td>
-      <i class="fa-solid fa-trash delete" onClick="deleteProduct('${product._id}')"></i>
+      <td><<i class="fa-solid fa-trash delete" onClick="deleteProduct('${product._id}')"></i>/td>
     </tr>
       `;
     });
@@ -55,7 +55,7 @@ form.addEventListener("submit", async (e) => {
     return;
   }
   try {
-    const response = fetch(`${API_URL}/api/products`, {
+    const response = await fetch(`${API_URL}/api/products`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -69,7 +69,7 @@ form.addEventListener("submit", async (e) => {
     });
     const data = await response.json();
     if (!response.ok) {
-      alert("data.message");
+      alert(data.message);
       return;
     }
     alert("Product added successfully");
