@@ -1,48 +1,37 @@
-const loginBtn = document.getElementById("login-btn");
+const BASE_URL = "https://plastic-rrr-store.onrender.com";
 
-loginBtn.addEventListener("click", async (e) => {
-  e.preventDefault();
+const btn = document.getElementById("loginBtn");
+const error = document.getElementById("error");
 
-  const profileCode = document.getElementById("profileCode").value;
-  const phoneNumber = document.getElementById("phoneNumber").value;
+btn.addEventListener("click", async () => {
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
 
-  if (!profileCode || !phoneNumber) {
-    alert("Please fill all fields");
-    return;
-  }
+  btn.textContent = "Logging in...";
+  btn.disabled = true;
+  error.textContent = "";
 
   try {
-    const response = await fetch(
-      "https://plastic-rrr-store.onrender.com/api/auth/login",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          profileCode,
-          phoneNumber,
-        }),
-      }
-    );
+    const res = await fetch(`${BASE_URL}/admin/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, password }),
+    });
 
-    const data = await response.json();
+    const data = await res.json();
 
-    if (!response.ok) {
-      alert(data.message);
-      return;
+    if (data.success) {
+      localStorage.setItem("token", data.token);
+      window.location.href = "index.html";
+    } else {
+      error.textContent = "Invalid credentials";
     }
-
-    localStorage.setItem("adminToken", data.token);
-    localStorage.setItem("userData", JSON.stringify(data.user));
-
-    alert("Login Successful");
-
-    window.location.href = "index.html";
-
-  } catch (error) {
-    console.log(error);
-
-    alert("Server Error");
+  } catch (err) {
+    error.textContent = "Server error";
+  } finally {
+    btn.textContent = "Login";
+    btn.disabled = false;
   }
 });
