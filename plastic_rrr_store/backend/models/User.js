@@ -18,4 +18,4 @@ const userSchema = new mongoose.Schema({
         default: 0,
     }
 })
-module.experts = mongoose.model("User", userSchema)
+module.exports = mongoose.model("User", userSchema)
