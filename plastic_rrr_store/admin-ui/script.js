@@ -51,7 +51,9 @@ async function loadProducts() {
       </td>
       <td>${product.points}</td>
       <td>${product.stock}</td>
-      <td><<i class="fa-solid fa-trash delete" onClick="deleteProduct('${product._id}')"></i>/td>
+      <td>
+      <i class="fa-solid fa-trash delete" onClick="deleteProduct('${product._id}')"></i>
+      </td>
     </tr>
       `;
     });
