@@ -28,7 +28,7 @@ async function loadProducts() {
       <img src="${product.image}" alt="${product.name}" />
       <h3>${product.name}</h3>
       <p>${product.points} Points</p>
-      <button onclick="addToCart('$product._id')">Add to Cart</button></div>
+      <button onclick="addToCart('${product._id}')">Add to Cart</button></div>
       `
     })
     window.allProducts = products
