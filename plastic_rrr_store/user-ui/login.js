@@ -1,13 +1,48 @@
 const loginBtn = document.getElementById("login-btn");
-loginBtn.addEventListener("click", (e) => {
+
+loginBtn.addEventListener("click", async (e) => {
   e.preventDefault();
-  const profileCode = document.querySelector(`input[type="text"]`).value;
-  const phone = document.querySelector(`input[type="tel"]`).value;
-  if (!profileCode || !phone) {
+
+  const profileCode = document.getElementById("profileCode").value;
+  const phoneNumber = document.getElementById("phoneNumber").value;
+
+  if (!profileCode || !phoneNumber) {
     alert("Please fill all fields");
     return;
   }
-  localStorage.setItem("userData", JSON.stringify(user));
-  localStorage.setItem("userToken", "sample_token");
-  window.location.href = "index.html";
+
+  try {
+    const response = await fetch(
+      "https://plastic-rrr-store.onrender.com/api/auth/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          profileCode,
+          phoneNumber,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message);
+      return;
+    }
+
+    localStorage.setItem("adminToken", data.token);
+    localStorage.setItem("userData", JSON.stringify(data.user));
+
+    alert("Login Successful");
+
+    window.location.href = "index.html";
+
+  } catch (error) {
+    console.log(error);
+
+    alert("Server Error");
+  }
 });

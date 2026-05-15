@@ -3,16 +3,6 @@ const jwt = require("jsonwebtoken");
 
 const loginUser = async (req, res) => {
   try {
-    const { username, password } = req.body;
-    const admin = await User.findOne({
-      username,
-      password,
-    });
-    if (!admin) {
-      return res.status(400).json({
-        message: "Invalid credentials",
-      });
-    }
     const { profileCode, phone } = req.body;
     const user = await User.findOne({
       profileCode,
