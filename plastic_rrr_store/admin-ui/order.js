@@ -28,7 +28,7 @@ async function loadOrders(){
             <span class="status pending">${order.status}</span>
             </td>
             <td>
-            <button class="deliver-btn">Deliver</button>
+            <button class="deliver-btn" onclick="markDelivered(`${order._id}`)">Deliver</button>
             </td>
             </tr>
             `
@@ -39,6 +39,29 @@ async function loadOrders(){
     }
 }
 loadOrders()
+async function markDelivered(id){
+    try{
+        const response = await fetch(
+            `${API_URL}/api/orders/${id}`,
+            {
+                method:"PATCH",
+                headers:{
+                    "Content-Type":"application/json"
+                }
+            }
+        )
+        const data = await response.json()
+        if(!response.ok){
+            alert(data.message || "Failed to update order")
+            return
+        }
+        alert("order marked as delivered")
+        loadOrders()
+    }catch(error){
+        console.log(error)
+        alert("Error updating order")
+    }
+}
 document.getElementById("logOut").addEventListener("click",()=>{
     localStorage.removeItem("adminToken")
     window.location.href ="login.html"

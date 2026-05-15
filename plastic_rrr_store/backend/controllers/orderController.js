@@ -77,4 +77,18 @@ const getOrders = async (req, res) => {
     });
   }
 };
-module.exports = { createOrder, getOrders };
+const updateOrderStatus = async(req, res)=>{
+  try{
+    const {id} = req.params
+    const order = await Order.findOneAndUpdate(id)
+    if(!order){
+      return res.status(404).json({message: "Order not found"})
+    }
+    order.status = "Delivered"
+    await order.save()
+    res.json({message:"Order marked as delivered", order})
+  }catch(error){
+    res.status(500).json({message: error.message})
+  }
+}
+module.exports = { createOrder, getOrders, updateOrderStatus };
