@@ -13,7 +13,7 @@ loginBtn.addEventListener("click", async (e) => {
 
   try {
     const response = await fetch(
-      "https://plastic-rrr.onrender.com/api/auth/login",
+      "https://plastic-rrr-store.onrender.com/api/auth/login",
       {
         method: "POST",
         headers: {

@@ -1,7 +1,7 @@
 const cartContainer = document.querySelector(".cart-container");
 const cartTotal = document.getElementById("cartTotal");
 const checkOutBtn = document.getElementById("checkoutBtn");
-const API_URL = "https://plastic-rrr.onrender.com";
+const API_URL = "https://plastic-rrr-store.onrender.com";
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 function loadCart() {
   cartContainer.innerHTML = "";

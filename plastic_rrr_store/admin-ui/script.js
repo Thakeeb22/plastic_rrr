@@ -1,6 +1,6 @@
 const { response } = require("express");
 
-const API_URL = "https://plastic-rrr.onrender.com";
+const API_URL = "https://plastic-rrr-store.onrender.com";
 const token = localStorage.getItem("adminToken");
 if (!token) {
   window.location.href = "login.html";

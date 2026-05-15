@@ -19,7 +19,7 @@ updateCartCount();
 
 async function loadProducts() {
   try{
-    const response = await fetch("https://plastic-rrr.onrender.com/api/products")
+    const response = await fetch("https://plastic-rrr-store.onrender.com/api/products")
     const products = await response.json()
     productContainer.innerHTML = ""
     products.forEach((product) =>{

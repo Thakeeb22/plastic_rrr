@@ -1,4 +1,4 @@
-const API_URL = "https://plastic-rrr.onrender.com"
+const API_URL = "https://plastic-rrr-store.onrender.com"
 const token = localStorage.getItem("adminTOken")
 if(!token){
     window.location.href = "login.html"
