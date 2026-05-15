@@ -10,6 +10,24 @@ logOutBtn.addEventListener("click", () => {
   localStorage.removeItem("adminToken");
   window.location.href = "login.html";
 });
+
+async function loadStats() {
+  try {
+    const res = await fetch(`${API_URL}/api/stats`);
+    const data = await res.json();
+    document.querySelectorAll(".stat-card h3")[0].textContent =
+      data.totalProducts;
+    document.querySelectorAll(".stat-card h3")[1].textContent =
+      data.totalOrders;
+    document.querySelectorAll(".stat-card h3")[2].textContent =
+      data.totalredeemedPoints;
+    document.querySelectorAll(".stat-card h3")[3].textContent =
+      data.pendingOrders;
+  } catch (err) {
+    console.log(err);
+  }
+}
+loadStats();
 async function loadProducts() {
   try {
     const response = await fetch(`${API_URL}/api/products`);
