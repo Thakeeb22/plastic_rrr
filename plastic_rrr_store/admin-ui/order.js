@@ -28,7 +28,7 @@ async function loadOrders(){
             <span class="status pending">${order.status}</span>
             </td>
             <td>
-            <button class="deliver-btn" onclick="markDelivered(`${order._id}`)">Deliver</button>
+            <button class="deliver-btn" onclick="markDelivered('${order._id}')">Deliver</button>
             </td>
             </tr>
             `
